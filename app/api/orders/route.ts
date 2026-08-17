@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getLiveCargusTracking } from "@/lib/cargus";
 import { findOrder, orderCodeSchema, serializeOrder, updateOrder } from "@/lib/orders";
 
 export async function PATCH(request: Request) {
@@ -10,10 +11,7 @@ export async function PATCH(request: Request) {
     const order = await updateOrder(codeResult.data, { address, status: "preparing" });
     if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 });
     return NextResponse.json({ order: serializeOrder(order) });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Could not save your address." }, { status: 503 });
-  }
+  } catch (error) { console.error(error); return NextResponse.json({ error: "Could not save your address." }, { status: 503 }); }
 }
 
 export async function GET(request: Request) {
@@ -23,9 +21,14 @@ export async function GET(request: Request) {
   try {
     const order = await findOrder(result.data);
     if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 });
-    return NextResponse.json({ order: serializeOrder(order) }, { headers: { "Cache-Control": "no-store" } });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Order service is not configured." }, { status: 503 });
-  }
+    if (!order.awb.trim()) return NextResponse.json({ order: serializeOrder({ ...order, status: "not_sent", awbStatus: null, awbStatusDescription: null, awbLastCheckedAt: null }) }, { headers: { "Cache-Control": "no-store" } });
+    try {
+      const live = await getLiveCargusTracking(order);
+      const refreshed = await updateOrder(order.code, { status: live.status, awbStatus: live.awbStatus, awbStatusDescription: live.awbStatusDescription, awbLastCheckedAt: live.awbLastCheckedAt });
+      return NextResponse.json({ order: serializeOrder(refreshed ?? live) }, { headers: { "Cache-Control": "no-store" } });
+    } catch (scrapeError) {
+      console.error("Cargus refresh failed", scrapeError);
+      return NextResponse.json({ order: serializeOrder(order), trackingUnavailable: true }, { headers: { "Cache-Control": "no-store" } });
+    }
+  } catch (error) { console.error(error); return NextResponse.json({ error: "Order service is not configured." }, { status: 503 }); }
 }

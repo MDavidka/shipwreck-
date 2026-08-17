@@ -30,6 +30,10 @@ The interface includes Romanian (`Română`) as the default language, plus Magya
 
 Import the repository into Vercel, keep the default Next.js build settings, and add `MONGO_API_KEY` under Project Settings → Environment Variables for Preview and Production. The deployed server routes will use the same variable; no client-side MongoDB credential is required. Vercel normally assigns its own runtime port automatically; the local `dev` and `start` scripts use `9676`.
 
+## AWB tracking refresh
+
+When a customer looks up an order that has a Cargus AWB, the server fetches the public result page at `https://xawb.ro/cargus?q=AWB`, extracts the visible tracking text, normalizes it into `preparing`, `sent`, or `delivered`, and stores the latest status and check time in MongoDB. The browser never calls the tracking site directly. If the order has no AWB, the response is explicitly normalized to `Not yet sent`; it is never shown as sent or delivered. If the external page is temporarily unavailable, the last stored order data is returned with a localized availability notice.
+
 ## Data and access behavior
 
 A public lookup accepts only a five-digit code. A public address update can update only the matching order's address and moves it to the shipping step. Admin `GET`, `POST`, and `PATCH` operations all require the `x-admin-code: admin3&` header and independently reject unauthorized requests server-side. The admin interface can create codes and edit Cargus AWB, order price, shipping price, and shipping-paid state.
