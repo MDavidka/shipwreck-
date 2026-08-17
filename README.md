@@ -32,7 +32,7 @@ Import the repository into Vercel, keep the default Next.js build settings, and 
 
 ## AWB tracking refresh
 
-When a customer looks up an order that has a Cargus AWB, the server fetches the public result page at `https://xawb.ro/cargus?q=AWB`, extracts the visible tracking text, normalizes it into `preparing`, `sent`, or `delivered`, and stores the latest status and check time in MongoDB. The browser never calls the tracking site directly. If the order has no AWB, the response is explicitly normalized to `Not yet sent`; it is never shown as sent or delivered. If the external page is temporarily unavailable, the last stored order data is returned with a localized availability notice.
+When a customer looks up an order that has a Cargus AWB, the server fetches the public result page at `https://xawb.ro/cargus/rezultat?q=AWB`, extracts the visible tracking text, normalizes it into `preparing`, `sent`, or `delivered`, and stores the latest status and check time in MongoDB. The browser never calls the tracking site directly. If the order has no AWB, the response is explicitly normalized to `Not yet sent`; it is never shown as sent or delivered. If the external page is temporarily unavailable, the last stored order data is returned with a localized availability notice.
 
 ## Data and access behavior
 
