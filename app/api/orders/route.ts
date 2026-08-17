@@ -21,10 +21,10 @@ export async function GET(request: Request) {
   try {
     const order = await findOrder(result.data);
     if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 });
-    if (!order.awb.trim()) return NextResponse.json({ order: serializeOrder({ ...order, status: "not_sent", awbStatus: null, awbStatusDescription: null, awbLastCheckedAt: null }) }, { headers: { "Cache-Control": "no-store" } });
+    if (!order.awb.trim()) return NextResponse.json({ order: serializeOrder({ ...order, status: "not_sent", awbStatus: null, awbStatusDescription: null, awbLastCheckedAt: null, awbEvents: [], awbRoute: [] }) }, { headers: { "Cache-Control": "no-store" } });
     try {
       const live = await getLiveCargusTracking(order);
-      const refreshed = await updateOrder(order.code, { status: live.status, awbStatus: live.awbStatus, awbStatusDescription: live.awbStatusDescription, awbLastCheckedAt: live.awbLastCheckedAt });
+      const refreshed = await updateOrder(order.code, { status: live.status, awbStatus: live.awbStatus, awbStatusDescription: live.awbStatusDescription, awbLastCheckedAt: live.awbLastCheckedAt, awbEvents: live.awbEvents, awbRoute: live.awbRoute });
       return NextResponse.json({ order: serializeOrder(refreshed ?? live) }, { headers: { "Cache-Control": "no-store" } });
     } catch (scrapeError) {
       console.error("Cargus refresh failed", scrapeError);
