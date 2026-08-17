@@ -22,11 +22,13 @@ npm install
 npm run dev
 ```
 
-The public tracker is available at `http://localhost:3000/`. The admin page is at `http://localhost:3000/admin/`; enter `admin3&` as a scan/code value to unlock it.
+The local development server runs on port `9676`. The public tracker is available at `http://localhost:9676/`. The admin page is at `http://localhost:9676/admin/`; enter `admin3&` as a scan/code value to unlock it.
+
+The interface includes Romanian (`Română`) as the default language, plus Magyar and English. The selected language is saved in the browser and shared by the public and admin pages.
 
 ## Vercel
 
-Import the repository into Vercel, keep the default Next.js build settings, and add `MONGO_API_KEY` under Project Settings → Environment Variables for Preview and Production. The deployed server routes will use the same variable; no client-side MongoDB credential is required.
+Import the repository into Vercel, keep the default Next.js build settings, and add `MONGO_API_KEY` under Project Settings → Environment Variables for Preview and Production. The deployed server routes will use the same variable; no client-side MongoDB credential is required. Vercel normally assigns its own runtime port automatically; the local `dev` and `start` scripts use `9676`.
 
 ## Data and access behavior
 
