@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { --background: 42 28% 97%; --foreground: 32 18% 17%; --card: 42 32% 99%; --card-foreground: 32 18% 17%; --primary: 32 18% 17%; --primary-foreground: 42 28% 97%; --muted: 38 14% 91%; --muted-foreground: 32 8% 46%; --accent: 157 31% 35%; --accent-foreground: 0 0% 100%; --border: 35 14% 84%; --input: 35 14% 80%; --ring: 157 31% 35%; --destructive: 0 64% 45%; --radius: 0.35rem; }
+  * { @apply border-border; }
+  html { font-family: Inter, sans-serif; }
+  body { @apply bg-background text-foreground antialiased; min-width: 320px; }
+  button, input { font: inherit; }
+}
+@layer components {
+  .site-shell { @apply min-h-screen bg-background; }
+  .content-width { @apply mx-auto w-full max-w-2xl px-5 sm:px-8; }
+  .quiet-link { @apply text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground; }
+  .step-line { @apply h-px flex-1 bg-border; }
+}
