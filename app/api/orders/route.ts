@@ -7,7 +7,7 @@ export async function PATCH(request: Request) {
     const codeResult = orderCodeSchema.safeParse(body.code);
     const address = typeof body.address === "string" ? body.address.trim() : "";
     if (!codeResult.success || !address || address.length > 500) return NextResponse.json({ error: "Enter a valid delivery address." }, { status: 400 });
-    const order = await updateOrder(codeResult.data, { address, status: "shipping" });
+    const order = await updateOrder(codeResult.data, { address, status: "preparing" });
     if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 });
     return NextResponse.json({ order: serializeOrder(order) });
   } catch (error) {

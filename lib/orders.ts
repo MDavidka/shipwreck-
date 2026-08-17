@@ -33,12 +33,12 @@ export const orderUpdateSchema = z.object({
   orderPrice: z.number().min(0).max(1000000).optional(),
   shippingPrice: z.number().min(0).max(1000000).optional(),
   shippingPaid: z.boolean().optional(),
-  status: z.enum(["address", "shipping"]).optional(),
+  status: z.enum(["code", "address", "preparing", "sent", "delivered", "shipping"]).optional(),
 });
 
 export type OrderRecord = {
   code: string;
-  status: "code" | "address" | "shipping";
+  status: "code" | "address" | "preparing" | "sent" | "delivered" | "shipping";
   address: string;
   awb: string;
   orderPrice: number;
