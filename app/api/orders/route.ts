@@ -10,7 +10,7 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json(); const parsed = customerDetailsSchema.safeParse({ ...body, customerPhone: normalizePhone(String(body.customerPhone ?? "")), lockerName: body.lockerName || null });
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Enter valid delivery details." }, { status: 400 });
-    const data = parsed.data; const order = await updateOrder(data.code, { customerName: data.customerName, customerPhone: data.customerPhone, address: data.address, shippingMethod: data.shippingMethod, lockerName: data.lockerName, status: "preparing" });
+    const data = parsed.data; const existing = await findOrder(data.code); if (!existing) return NextResponse.json({ error: "Order not found." }, { status: 404 }); const selectedMethod = existing.shippingMethodLocked ? existing.shippingMethod : data.shippingMethod; const selectedLocker = selectedMethod === "locker" ? data.lockerName : null; const order = await updateOrder(data.code, { customerName: data.customerName, customerPhone: data.customerPhone, address: data.address, shippingMethod: selectedMethod, lockerName: selectedLocker, status: "preparing" });
     if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 }); return NextResponse.json({ order: serializeOrder(order) });
   } catch (error) { console.error(error); return NextResponse.json({ error: "Could not save your delivery details." }, { status: 503 }); }
 }
@@ -22,6 +22,6 @@ export async function GET(request: Request) {
     const order = await findOrder(result.data); if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 });
     if (!order.awb.trim()) return NextResponse.json({ order: serializeOrder({ ...order, status: "not_sent", awbStatus: null, awbStatusDescription: null, awbLastCheckedAt: null, awbEvents: [], awbRoute: [] }) }, { headers: { "Cache-Control": "no-store" } });
     try { const live = await getLiveCargusTracking(order); const refreshed = await updateOrder(order.code, { status: live.status, awbStatus: live.awbStatus, awbStatusDescription: live.awbStatusDescription, awbLastCheckedAt: live.awbLastCheckedAt, awbEvents: live.awbEvents, awbRoute: live.awbRoute }); return NextResponse.json({ order: serializeOrder(refreshed ?? live) }, { headers: { "Cache-Control": "no-store" } }); }
-    catch (scrapeError) { console.error("Cargus refresh failed", scrapeError); return NextResponse.json({ order: serializeOrder(order), trackingUnavailable: true }, { headers: { "Cache-Control": "no-store" } }); }
+    catch (scrapeError) { console.error("Cargus refresh failed", scrapeError); return NextResponse.json({ order: serializeOrder({ ...order, awbStatus: null, awbStatusDescription: null, awbLastCheckedAt: null, awbEvents: [], awbRoute: [] }), trackingUnavailable: true }, { headers: { "Cache-Control": "no-store" } }); }
   } catch (error) { console.error(error); return NextResponse.json({ error: "Order service is not configured." }, { status: 503 }); }
 }
